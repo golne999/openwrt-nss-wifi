@@ -16,20 +16,9 @@ jobs:
                 ./scripts/feeds update -a
                 ./scripts/feeds install -a
 
-            - name: Import and patch .config for 1G + AX6/AX3600
+            - name: Import full config for IPQ807x NSS Generic
               run: |
                 mv .full_config .config
-
-                # 替换内存为1GB
-                sed -i 's/CONFIG_ATH11K_MEM_PROFILE_512M=y/# CONFIG_ATH11K_MEM_PROFILE_512M is not set\nCONFIG_ATH11K_MEM_PROFILE_1G=y/' .config
-                sed -i 's/CONFIG_IPQ_MEM_PROFILE_512=y/# CONFIG_IPQ_MEM_PROFILE_512 is not set\nCONFIG_IPQ_MEM_PROFILE_1024=y/' .config
-
-                # 只保留 redmi_ax6 与 xiaomi_ax3600
-                sed -i 's/.*DEVICE_redmi_ax6.*/CONFIG_TARGET_qualcommax_ipq807x_DEVICE_redmi_ax6=y/' .config
-                sed -i 's/.*DEVICE_xiaomi_ax3600.*/CONFIG_TARGET_qualcommax_ipq807x_DEVICE_xiaomi_ax3600=y/' .config
-                sed -i '/CONFIG_TARGET_.*_DEVICE_/!b; /ax6\|ax3600/!s/^/# /' .config
-
-                make defconfig
 
             - name: QoL fixes on default config
               run: |
@@ -75,9 +64,9 @@ jobs:
             - name: Create a release
               uses: "ncipollo/release-action@v1"
               with:
-                name: "Updated prebuilt images (AX6/AX3600 1G NSS) ${{ env.NOW }}"
+                name: "Updated prebuilt images (NSS-WiFi) ${{ env.NOW }}"
                 commit: "main_nss"
-                tag: "ax6-ax3600-1g-${{ env.NOW }}"
+                tag: "ipq807x-nsswifi-${{ env.NOW }}"
                 generateReleaseNotes: true
                 makeLatest: true
                 artifacts: bin/targets/qualcommax/ipq807x/*
